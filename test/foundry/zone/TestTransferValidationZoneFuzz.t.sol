@@ -1463,7 +1463,10 @@ contract TestTransferValidationZoneOffererTest is BaseOrderTest {
         bool success;
         assembly {
             // Transfer the native token and store if it succeeded or not.
-            success := call(gas(), _address, 1, 0, 0, 0, 0)
+            // The gas is capped because a fuzzed address can be a contract
+            // that consumes everything forwarded to it, such as the CREATE2
+            // deployer on a colliding deployment.
+            success := call(100000, _address, 1, 0, 0, 0, 0)
         }
 
         if (success) {

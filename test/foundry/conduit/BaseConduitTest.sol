@@ -58,7 +58,13 @@ contract BaseConduitTest is
         if (to == address(0)) {
             return false;
         } else if (to.code.length > 0) {
-            (bool success, bytes memory returnData) = to.call(
+            // Cap the gas. A fuzzed address can be any contract already in
+            // state, and some consume everything forwarded to them: the
+            // canonical CREATE2 deployer at 0x4e59b448... reads this calldata
+            // as a salt plus initcode, and once an address has been deployed
+            // the next colliding CREATE2 burns the whole budget, failing the
+            // test with OutOfGas. A real onERC1155Received is far cheaper.
+            (bool success, bytes memory returnData) = to.call{ gas: 100_000 }(
                 abi.encodePacked(
                     ERC1155TokenReceiver.onERC1155Received.selector,
                     address(0),
