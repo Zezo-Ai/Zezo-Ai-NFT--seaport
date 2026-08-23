@@ -102,7 +102,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.4.4
 
       - name: Install forge dependencies
         run: forge install
@@ -128,7 +128,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.4.4
 
       - name: Install forge dependencies
         run: forge install
@@ -153,7 +153,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.4.4
 
       - name: Install forge dependencies
         run: forge install
@@ -178,13 +178,19 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.4.4
 
       - name: Install forge dependencies
         run: forge install
 
+      - name: Precompile reference using 0.8.24 and via-ir=false
+        run: FOUNDRY_PROFILE=reference forge build
+
+      - name: Precompile optimized using 0.8.24 and via-ir=true
+        run: FOUNDRY_PROFILE=optimized forge build
+
       - name: Run coverage with lcov output
-        run: SEAPORT_COVERAGE=true forge coverage --report lcov
+        run: FOUNDRY_PROFILE=default SEAPORT_COVERAGE=true forge coverage --report lcov
 
       - uses: codecov/codecov-action@v3
         with:
