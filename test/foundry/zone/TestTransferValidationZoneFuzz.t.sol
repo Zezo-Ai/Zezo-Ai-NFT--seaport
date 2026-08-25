@@ -1453,10 +1453,20 @@ contract TestTransferValidationZoneOffererTest is BaseOrderTest {
     function _nudgeAddressIfProblematic(
         address _address
     ) internal returns (address) {
+        // Move clear of the precompile range before probing. Precompiles
+        // revert on a bare value transfer, and nudging by one is not enough
+        // to escape: under cancun 0x09 nudges to 0x0a, which reverts too.
+        if (uint160(_address) <= 0x0a) {
+            _address = address(uint160(_address) + 0x0a);
+        }
+
         bool success;
         assembly {
             // Transfer the native token and store if it succeeded or not.
-            success := call(gas(), _address, 1, 0, 0, 0, 0)
+            // The gas is capped because a fuzzed address can be a contract
+            // that consumes everything forwarded to it, such as the CREATE2
+            // deployer on a colliding deployment.
+            success := call(100000, _address, 1, 0, 0, 0, 0)
         }
 
         if (success) {
